@@ -1,6 +1,7 @@
-package br.com.zup.order.configuration;
+package br.com.zup.payment.configuration;
 
-import br.com.zup.order.event.OrderCreatedEvent;
+
+import br.com.zup.payment.event.ReserveCreatedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -43,7 +44,7 @@ public class KafkaConfiguration {
 
     @Bean
     public NewTopic message() {
-        return new NewTopic("created-orders", 1, (short) 1);
+        return new NewTopic("created-payments", 1, (short) 1);
     }
 
     @Bean
@@ -59,14 +60,14 @@ public class KafkaConfiguration {
     }
 
     @Bean
-    public KafkaTemplate<String, OrderCreatedEvent> messageKafkaTemplate() {
-        return new KafkaTemplate<String, OrderCreatedEvent>(messageProducerFactory());
+    public KafkaTemplate<String, ReserveCreatedEvent> messageKafkaTemplate() {
+        return new KafkaTemplate<String, ReserveCreatedEvent>(messageProducerFactory());
     }
 
     @Bean
     public ConsumerFactory<String, String> consumerFactory() {
         Map<String, Object> props = new HashMap<>();
-        props.put(ConsumerConfig.GROUP_ID_CONFIG, "order-group-id");
+        props.put(ConsumerConfig.GROUP_ID_CONFIG, "payment-group-id");
         props.put(ConsumerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
         props.put(ConsumerConfig.KEY_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
         props.put(ConsumerConfig.VALUE_DESERIALIZER_CLASS_CONFIG, StringDeserializer.class);
@@ -81,10 +82,10 @@ public class KafkaConfiguration {
         return factory;
     }
 
-    @KafkaListener(topics = "cancel-order", groupId = "order-group-id")
+    @KafkaListener(topics = "created-payments", groupId = "payment-group-id")
     public void listen(String message) throws IOException {
 
-        OrderCreatedEvent event = this.objectMapper.readValue(message, OrderCreatedEvent.class);
-        System.out.println(">>> Received cancel order event from inventory topic: " + event.getCustomerId());
+        ReserveCreatedEvent event = this.objectMapper.readValue(message, ReserveCreatedEvent.class);
+        System.out.println(">>> Received payment event from inventory topic: " + event.getCustomerId());
     }
 }

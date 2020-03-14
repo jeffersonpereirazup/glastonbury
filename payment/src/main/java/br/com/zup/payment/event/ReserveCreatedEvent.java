@@ -1,4 +1,4 @@
-package br.com.zup.inventory.event;
+package br.com.zup.payment.event;
 
 public class ReserveCreatedEvent {
 
