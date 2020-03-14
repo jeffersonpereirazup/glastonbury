@@ -10,17 +10,17 @@ public class OrderCreatedEvent {
     private String customerId;
     private BigDecimal amount;
     private List<String> itemIds;
-    private Map<String, Integer> quantityPerDay;
+    private Integer quantity;
 
     public OrderCreatedEvent() {
     }
 
-    public OrderCreatedEvent(String orderId, String customerId, BigDecimal amount, List<String> itemIds, Map<String, Integer> quantityPerDay) {
+    public OrderCreatedEvent(String orderId, String customerId, BigDecimal amount, List<String> itemIds, Integer quantity) {
         this.orderId = orderId;
         this.customerId = customerId;
         this.amount = amount;
         this.itemIds = itemIds;
-        this.quantityPerDay = quantityPerDay;
+        this.quantity = quantity;
     }
 
     public String getOrderId() {
@@ -55,11 +55,11 @@ public class OrderCreatedEvent {
         this.itemIds = itemIds;
     }
 
-    public Map<String, Integer> getQuantityPerDay() {
-        return quantityPerDay;
+    public Integer getQuantity() {
+        return quantity;
     }
 
-    public void setQuantityPerDay(Map<String, Integer> quantityPerDay) {
-        this.quantityPerDay = quantityPerDay;
+    public void setQuantity(Integer quantity) {
+        this.quantity = quantity;
     }
 }

@@ -9,7 +9,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.*;
+import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
@@ -37,11 +38,7 @@ public class OrderServiceImpl implements OrderService {
                         .stream()
                         .map(CreateOrderRequest.OrderItemPart::getId)
                         .collect(Collectors.toList()),
-                request.getItems()
-                .stream()
-                .collect(Collectors.toMap(CreateOrderRequest.OrderItemPart::getName,
-                        CreateOrderRequest.OrderItemPart::getQuantity))
-
+                request.getItems().stream().mapToInt(i -> i.getQuantity()).sum()
         );
 
         this.template.send("created-orders", event);

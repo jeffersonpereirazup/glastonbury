@@ -8,8 +8,6 @@ import br.com.zup.inventory.service.TransactionService;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
-
 @Service
 public class TransactionServiceImpl implements TransactionService {
 
@@ -39,7 +37,17 @@ public class TransactionServiceImpl implements TransactionService {
     @Override
     public void buyTicket(OrderCreatedEvent event) {
 
-        event.getQuantityPerDay();
+        Ticket tickets = this.ticketRepository.findAll().get(0);
+        Integer totalOfticketsForBuy = event.getQuantity();
 
+        if(totalOfticketsForBuy <= tickets.getQuantity() )
+        {
+            //TODO: confirmar compra
+            //TODO: reserva tickets
+        }
+        else
+        {
+            //TODO: Ingressos insuficientes
+        }
     }
 }
