@@ -1,6 +1,7 @@
 package br.com.zup.inventory.configuration;
 
 import br.com.zup.inventory.event.OrderCreatedEvent;
+import br.com.zup.inventory.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
@@ -21,9 +22,10 @@ public class KafkaConfiguration {
 
     private String bootstrap;
     private ObjectMapper objectMapper;
+    private TransactionService transactionService;
 
     public KafkaConfiguration(@Value(value = "${spring.kafka.bootstrap-servers}") String bootstrap,
-                              ObjectMapper objectMapper) {
+                              ObjectMapper objectMapper, TransactionService transactionService) {
         this.bootstrap = bootstrap;
         this.objectMapper = objectMapper;
     }
@@ -48,7 +50,10 @@ public class KafkaConfiguration {
 
     @KafkaListener(topics = "created-orders", groupId = "inventory-group-id")
     public void listen(String message) throws IOException {
+
         OrderCreatedEvent event = this.objectMapper.readValue(message, OrderCreatedEvent.class);
+        this.transactionService.buyTicket(event);
+
         System.out.println("Received event: " + event.getCustomerId());
     }
 }

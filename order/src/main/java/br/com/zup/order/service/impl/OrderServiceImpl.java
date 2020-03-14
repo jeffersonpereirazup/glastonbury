@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -26,6 +26,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String save(CreateOrderRequest request) {
+
         String orderId = this.orderRepository.save(request.toEntity()).getId();
 
         OrderCreatedEvent event = new OrderCreatedEvent(
@@ -35,7 +36,12 @@ public class OrderServiceImpl implements OrderService {
                 request.getItems()
                         .stream()
                         .map(CreateOrderRequest.OrderItemPart::getId)
-                        .collect(Collectors.toList())
+                        .collect(Collectors.toList()),
+                request.getItems()
+                .stream()
+                .collect(Collectors.toMap(CreateOrderRequest.OrderItemPart::getName,
+                        CreateOrderRequest.OrderItemPart::getQuantity))
+
         );
 
         this.template.send("created-orders", event);
