@@ -1,16 +1,24 @@
 package br.com.zup.inventory.configuration;
 
 import br.com.zup.inventory.event.OrderCreatedEvent;
+import br.com.zup.inventory.event.ReserveCreatedEvent;
+import br.com.zup.inventory.service.TransactionService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
+import org.apache.kafka.clients.producer.ProducerConfig;
 import org.apache.kafka.common.serialization.StringDeserializer;
+import org.apache.kafka.common.serialization.StringSerializer;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.context.annotation.Lazy;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.kafka.config.ConcurrentKafkaListenerContainerFactory;
 import org.springframework.kafka.core.ConsumerFactory;
 import org.springframework.kafka.core.DefaultKafkaConsumerFactory;
+import org.springframework.kafka.core.DefaultKafkaProducerFactory;
+import org.springframework.kafka.core.KafkaTemplate;
+import org.springframework.kafka.support.serializer.JsonSerializer;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -19,13 +27,11 @@ import java.util.Map;
 @Configuration
 public class KafkaConfiguration {
 
+    @Value(value = "${spring.kafka.bootstrap-servers}")
     private String bootstrap;
-    private ObjectMapper objectMapper;
 
-    public KafkaConfiguration(@Value(value = "${spring.kafka.bootstrap-servers}") String bootstrap,
-                              ObjectMapper objectMapper) {
+    public KafkaConfiguration(@Value(value = "${spring.kafka.bootstrap-servers}") String bootstrap) {
         this.bootstrap = bootstrap;
-        this.objectMapper = objectMapper;
     }
 
     @Bean
@@ -46,9 +52,22 @@ public class KafkaConfiguration {
         return factory;
     }
 
-    @KafkaListener(topics = "created-orders", groupId = "inventory-group-id")
-    public void listen(String message) throws IOException {
-        OrderCreatedEvent event = this.objectMapper.readValue(message, OrderCreatedEvent.class);
-        System.out.println(event);
+    @Bean
+    public KafkaTemplate<String, ReserveCreatedEvent> messageKafkaTemplate() {
+        return new KafkaTemplate<String, ReserveCreatedEvent>(messageProducerFactory());
     }
+
+    @Bean
+    public DefaultKafkaProducerFactory messageProducerFactory() {
+
+        Map<String, Object> configProps = new HashMap<>();
+
+        configProps.put(ProducerConfig.BOOTSTRAP_SERVERS_CONFIG, bootstrap);
+        configProps.put(ProducerConfig.KEY_SERIALIZER_CLASS_CONFIG, StringSerializer.class);
+        configProps.put(ProducerConfig.VALUE_SERIALIZER_CLASS_CONFIG, JsonSerializer.class);
+
+        return new DefaultKafkaProducerFactory<>(configProps);
+    }
+
+
 }

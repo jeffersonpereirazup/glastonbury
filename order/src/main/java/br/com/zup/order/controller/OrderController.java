@@ -27,7 +27,7 @@ public class OrderController {
         return this.orderService.save(request);
     }
 
-    @ResponseStatus(HttpStatus.CREATED)
+    @ResponseStatus(HttpStatus.OK)
     @GetMapping(consumes = MediaType.APPLICATION_JSON_VALUE)
     public List<OrderResponse> getOrders() {
         return this.orderService.findAll();

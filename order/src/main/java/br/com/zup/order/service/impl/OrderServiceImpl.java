@@ -28,6 +28,7 @@ public class OrderServiceImpl implements OrderService {
 
     @Override
     public String save(CreateOrderRequest request) {
+
         String orderId = this.orderRepository.save(request.toEntity()).getId();
 
         OrderCreatedEvent event = new OrderCreatedEvent(
