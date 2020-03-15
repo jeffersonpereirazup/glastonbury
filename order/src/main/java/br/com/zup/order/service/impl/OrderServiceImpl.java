@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -34,16 +35,21 @@ public class OrderServiceImpl implements OrderService {
                 orderId,
                 request.getCustomerId(),
                 request.getAmount(),
-                request.getItems()
-                        .stream()
-                        .map(CreateOrderRequest.OrderItemPart::getId)
-                        .collect(Collectors.toList()),
-                request.getItems().stream().mapToInt(i -> i.getQuantity()).sum()
+                createItemMap(request)
         );
 
         this.template.send("created-orders", event);
 
         return orderId;
+    }
+
+    private Map<String, Integer> createItemMap(CreateOrderRequest request) {
+        Map<String, Integer> result = new HashMap<>();
+        for (CreateOrderRequest.OrderItemPart item : request.getItems()) {
+            result.put(item.getId(), item.getQuantity());
+        }
+
+        return result;
     }
 
     @Override

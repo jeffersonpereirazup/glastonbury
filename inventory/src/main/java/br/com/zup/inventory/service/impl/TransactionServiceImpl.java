@@ -12,6 +12,7 @@ import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
 
 import java.io.IOException;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -50,7 +51,8 @@ public class TransactionServiceImpl implements TransactionService {
     public void buyTicket(OrderCreatedEvent event) {
 
         Ticket tickets = this.ticketRepository.findAll().get(0);
-        Integer totalOfticketsForBuy = event.getQuantity();
+        Map.Entry<String, Integer> ticketItem = event.getItems().entrySet().iterator().next();
+        Integer totalOfticketsForBuy = ticketItem.getValue();
 
         if(tickets.getQuantity().compareTo(totalOfticketsForBuy) >= 0)
         {
