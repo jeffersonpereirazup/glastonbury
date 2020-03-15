@@ -81,11 +81,4 @@ public class KafkaConfiguration {
         factory.setConsumerFactory(consumerFactory());
         return factory;
     }
-
-    @KafkaListener(topics = "created-payments", groupId = "payment-group-id")
-    public void listen(String message) throws IOException {
-
-        ReserveCreatedEvent event = this.objectMapper.readValue(message, ReserveCreatedEvent.class);
-        System.out.println(">>> Received payment event from inventory topic: " + event.getCustomerId());
-    }
 }

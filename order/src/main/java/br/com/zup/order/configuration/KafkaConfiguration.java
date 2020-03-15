@@ -1,6 +1,7 @@
 package br.com.zup.order.configuration;
 
 import br.com.zup.order.event.OrderCreatedEvent;
+import br.com.zup.order.event.ReserveCreatedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
@@ -47,6 +48,11 @@ public class KafkaConfiguration {
     }
 
     @Bean
+    public NewTopic topicToConfirmOrder() {
+        return new NewTopic("confirm-order", 1, (short) 1);
+    }
+
+    @Bean
     public DefaultKafkaProducerFactory messageProducerFactory() {
 
         Map<String, Object> configProps = new HashMap<>();
@@ -61,6 +67,11 @@ public class KafkaConfiguration {
     @Bean
     public KafkaTemplate<String, OrderCreatedEvent> messageKafkaTemplate() {
         return new KafkaTemplate<String, OrderCreatedEvent>(messageProducerFactory());
+    }
+
+    @Bean
+    public KafkaTemplate<String, ReserveCreatedEvent> templateToConfirmOrder() {
+        return new KafkaTemplate<String, ReserveCreatedEvent>(messageProducerFactory());
     }
 
     @Bean
@@ -82,9 +93,16 @@ public class KafkaConfiguration {
     }
 
     @KafkaListener(topics = "cancel-order", groupId = "order-group-id")
-    public void listen(String message) throws IOException {
+    public void listenConfirmation(String message) throws IOException {
 
         OrderCreatedEvent event = this.objectMapper.readValue(message, OrderCreatedEvent.class);
         System.out.println(">>> Received cancel order event from inventory topic: " + event.getCustomerId());
+    }
+
+    @KafkaListener(topics = "confirm-order", groupId = "order-group-id")
+    public void listen(String message) throws IOException {
+
+        ReserveCreatedEvent event = this.objectMapper.readValue(message, ReserveCreatedEvent.class);
+        System.out.println(">>> Received payment confirmation event from payment service: " + event.getCustomerId());
     }
 }
