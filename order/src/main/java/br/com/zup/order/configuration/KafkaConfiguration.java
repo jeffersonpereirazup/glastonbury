@@ -3,6 +3,8 @@ package br.com.zup.order.configuration;
 import br.com.zup.order.event.OrderCreatedEvent;
 import br.com.zup.order.event.ReserveCreatedEvent;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.apache.kafka.clients.admin.AdminClientConfig;
 import org.apache.kafka.clients.admin.NewTopic;
 import org.apache.kafka.clients.consumer.ConsumerConfig;
@@ -27,11 +29,13 @@ public class KafkaConfiguration {
     @Value(value = "${spring.kafka.bootstrap-servers}")
     private String bootstrap;
     private ObjectMapper objectMapper;
+    private Tracer tracer;
 
     public KafkaConfiguration(@Value(value = "${spring.kafka.bootstrap-servers}") String bootstrap,
-                              ObjectMapper objectMapper) {
+                              ObjectMapper objectMapper, Tracer tracer) {
         this.bootstrap = bootstrap;
         this.objectMapper = objectMapper;
+        this.tracer = tracer;
     }
 
 
@@ -95,14 +99,28 @@ public class KafkaConfiguration {
     @KafkaListener(topics = "cancel-order", groupId = "order-group-id")
     public void listenConfirmation(String message) throws IOException {
 
+        Span span = this.tracer.buildSpan("cancel-order-event-listener").start();
+
         OrderCreatedEvent event = this.objectMapper.readValue(message, OrderCreatedEvent.class);
+
+        span.setTag("order.customer_id", event.getCustomerId());
+
         System.out.println(">>> Received cancel order event from inventory topic: " + event.getCustomerId());
+
+        span.finish();
     }
 
     @KafkaListener(topics = "confirm-order", groupId = "order-group-id")
     public void listen(String message) throws IOException {
 
+        Span span = this.tracer.buildSpan("confirm-order-event-listener").start();
+
         ReserveCreatedEvent event = this.objectMapper.readValue(message, ReserveCreatedEvent.class);
+
+        span.setTag("order.customer_id", event.getCustomerId());
+
         System.out.println(">>> Received payment confirmation event from payment service: " + event.getCustomerId());
+
+        span.finish();
     }
 }

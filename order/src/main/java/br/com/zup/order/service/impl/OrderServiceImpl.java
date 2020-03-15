@@ -5,6 +5,8 @@ import br.com.zup.order.controller.response.OrderResponse;
 import br.com.zup.order.event.OrderCreatedEvent;
 import br.com.zup.order.repository.OrderRepository;
 import br.com.zup.order.service.OrderService;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.kafka.core.KafkaTemplate;
 import org.springframework.stereotype.Service;
@@ -19,15 +21,22 @@ public class OrderServiceImpl implements OrderService {
 
     private OrderRepository orderRepository;
     private KafkaTemplate<String, OrderCreatedEvent> template;
+    private Tracer tracer;
 
     @Autowired
-    public OrderServiceImpl(OrderRepository orderRepository, KafkaTemplate<String, OrderCreatedEvent> template) {
+    public OrderServiceImpl(OrderRepository orderRepository, KafkaTemplate<String, OrderCreatedEvent> template, Tracer tracer) {
         this.orderRepository = orderRepository;
         this.template = template;
+        this.tracer = tracer;
     }
 
     @Override
     public String save(CreateOrderRequest request) {
+
+        // Create a span
+        Span span = this.tracer.buildSpan("create-order-event-send").start();
+
+        span.setTag("order.customer_id", request.getCustomerId());
 
         String orderId = this.orderRepository.save(request.toEntity()).getId();
 
@@ -39,6 +48,8 @@ public class OrderServiceImpl implements OrderService {
         );
 
         this.template.send("created-orders", event);
+
+        span.finish();
 
         return orderId;
     }
