@@ -6,6 +6,87 @@
 	},
 	"item": [
 		{
+			"name": "Open Trancing",
+			"item": [
+				{
+					"name": "Order Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8080/actuator/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8080",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Inventory Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8081/actuator/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8081",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "Payment Health",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "http://localhost:8082/actuator/health",
+							"protocol": "http",
+							"host": [
+								"localhost"
+							],
+							"port": "8082",
+							"path": [
+								"actuator",
+								"health"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"protocolProfileBehavior": {}
+		},
+		{
 			"name": "Create Order",
 			"request": {
 				"method": "POST",
@@ -17,7 +98,7 @@
 				],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n    \"customerId\": \"{{$guid}}\",\n    \"amount\": 10.5,\n    \"items\": [\n        {\n            \"id\": \"{{$guid}}\",\n            \"name\": \"day-one\",\n            \"amount\" : 200.00,\n            \"quantity\" : 1\n        },\n        {\n            \"id\": \"{{$guid}}\",\n            \"name\": \"day-two\",\n            \"amount\" : 200.00,\n            \"quantity\" : 1\n        }\n    ]\n}",
+					"raw": "{\n    \"customerId\": \"{{$guid}}\",\n    \"amount\": 10.5,\n    \"items\": [\n        {\n            \"id\": \"{{$guid}}\",\n            \"name\": \"day-one\",\n            \"amount\" : 200.00,\n            \"quantity\" : 1\n        }\n    ]\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -69,7 +150,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\n\t \"day\": \"day-one\",\n     \"quantity\": 1\n}",
+					"raw": "{\n\t \"day\": \"day-one\",\n     \"quantity\": 2\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -94,7 +175,13 @@
 			"name": "Get Tickets",
 			"request": {
 				"method": "GET",
-				"header": [],
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json",
+						"type": "text"
+					}
+				],
 				"url": {
 					"raw": "http://localhost:8081/tickets",
 					"protocol": "http",
